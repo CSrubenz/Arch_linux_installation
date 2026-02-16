@@ -28,6 +28,7 @@ git clone [https://github.com/CSrubenz/arch-installer.git](https://github.com/CS
 cd arch-installer
 chmod +x install_arch.sh
 ./install_arch.sh
+```
 
 Note: The script will guide you through partitioning (cfdisk) and ask for your hardware profile. Once finished, type reboot and remove the USB drive.
 
@@ -35,7 +36,9 @@ Note: The script will guide you through partitioning (cfdisk) and ask for your h
 
 Log in with your newly created user account.
 
+```bash
 ./setup.sh
+```
 
 Note: This script will install the AUR helper (yay), user-specific packages, clone CSrubenz/dotfiles repository, and deploy them using GNU Stow.
 
@@ -43,10 +46,17 @@ Note: This script will install the AUR helper (yay), user-specific packages, clo
 
 Once setup_user.sh finishes, your system is fully configured. You can safely delete the Arch_linux_installation repository :
 
+```bash
 rm -rf Arch_linux_installation
+```
 
 Start your Wayland session :
+
+```bash
 Hyprland
+```
+
+Enjoy!
 
 ## 🛠️ Post-Installation Notes
 
