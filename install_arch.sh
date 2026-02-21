@@ -195,11 +195,20 @@ echo "==> Installing Network dependencies..."
 pacman -S --noconfirm networkmanager wpa_supplicant wireless_tools network-manager-applet dialog
 
 echo "==> Set ROOT password:"
-passwd
+while ! passwd; do
+    echo "[!] Les mots de passe ne correspondent pas. On recommence !"
+done
 
 read -p "-> Enter new username: " USER_NAME
-useradd -m -G wheel,video,audio -s /bin/bash $USER_NAME
-passwd $USER_NAME
+if ! id "$USER_NAME" &>/dev/null; then
+    useradd -m -G wheel,video,audio -s /bin/bash "$USER_NAME"
+fi
+
+echo "==> Set password for $USER_NAME:"
+while ! passwd "$USER_NAME"; do
+    echo "[!] Les mots de passe ne correspondent pas. On recommence !"
+done
+
 # Allow wheel group members to use sudo
 sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 
