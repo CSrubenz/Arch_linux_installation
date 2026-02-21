@@ -44,6 +44,11 @@ yay -S --noconfirm \
 
 # HARDWARE ADAPTATION
 
+if [ "$HW_DGPU" = "nvidia-legacy" ]; then
+	echo "==> NVIDIA Legacy (Pascal) detected : Install nvidia-580xx-dkms from the AUR..."
+	yay -S --noconfirm nvidia-580xx-dkms nvidia-580xx-utils
+fi
+
 # LACT is the thermal/overclocking GUI for AMD cards
 if [ "$HW_DGPU" = "amd" ] || [ "$HW_IGPU" = "amd" ]; then
     echo "==> AMD GPU detected: Installing and enabling LACT..."

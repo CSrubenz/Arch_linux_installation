@@ -29,7 +29,7 @@ if [ "$1" != "--chroot" ]; then
         HW_TYPE="laptop"
         HW_CPU="intel"
         HW_IGPU="intel"
-        HW_DGPU="nvidia"
+        HW_DGPU="nvidia-legacy"
         HW_KEY_SOFT="fr"
         HW_KEY_PHYS="ansi"
     else
@@ -60,6 +60,15 @@ if [ "$1" != "--chroot" ]; then
             3) HW_DGPU="intel" ;;
             *) HW_DGPU="none" ;;
         esac
+
+		if [ "$HW_DGPU" = "nvidia" ]; then
+			echo "-> Which architecture Nvidia your gpu have? [1] Pascal & older (GTX 10XX / MX150)  [2] Turing & newer (rtx & GTX 16XX)"
+			read -p "	Choice: " nvidia_archi
+			case $nvidia_archi in
+				1) HW_DGPU="nvidia-legacy" ;;
+				2) HW_DGPU="nvidia" ;;
+			esac
+		fi
 
         read -p "-> Software keyboard layout (e.g., fr, us): " HW_KEY_SOFT
 
@@ -137,7 +146,7 @@ if [ "$1" != "--chroot" ]; then
 
     # Added lvm2 to the base pacstrap
     echo "==> Installing base system..."
-    pacstrap /mnt base linux linux-firmware nvim git stow sudo lvm2
+    pacstrap /mnt base base-devel linux linux-headers linux-firmware nvim git stow sudo lvm2
     genfstab -U /mnt >> /mnt/etc/fstab
 
     # SAVE HARDWARE PROFILE AND LUKS UUID FOR THE CHROOT
@@ -229,15 +238,20 @@ GPU_PKGS=""
 [ "$HW_IGPU" = "intel" ] && GPU_PKGS="$GPU_PKGS mesa vulkan-intel"
 [ "$HW_IGPU" = "amd" ] && GPU_PKGS="$GPU_PKGS mesa vulkan-radeon xf86-video-amdgpu"
 
-# dGPU logic
+# dGPU logic (nvidia-legacy will be install later with yay in setup.sh)
 [ "$HW_DGPU" = "amd" ] && GPU_PKGS="$GPU_PKGS mesa vulkan-radeon xf86-video-amdgpu"
 [ "$HW_DGPU" = "nvidia" ] && GPU_PKGS="$GPU_PKGS nvidia nvidia-utils"
 [ "$HW_DGPU" = "intel" ] && GPU_PKGS="$GPU_PKGS mesa vulkan-intel"
 
-# Remove duplicates and install
+# Remove duplicates and install only if the variable is not empty because Nvidia sucks
 GPU_PKGS=$(echo "$GPU_PKGS" | tr ' ' '\n' | sort -u | tr '\n' ' ')
-echo "==> Installing graphics drivers: $GPU_PKGS"
-pacman -S --noconfirm $GPU_PKGS
+
+if [ -n "$(echo $GPU_PKGS | tr -d ' ')" ]; then
+    echo "==> Installing graphics drivers: $GPU_PKGS"
+    pacman -S --noconfirm $GPU_PKGS
+else
+    echo "==> No specific GPU packages to install via pacman at this stage (e.g. Nvidia Legacy or None)."
+fi
 
 # ==========================================================================
 # OFFICIAL PACKAGES INSTALLATION
