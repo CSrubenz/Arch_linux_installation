@@ -24,8 +24,8 @@ This repository contains the scripts to bootstrap a highly optimized, bloat-free
 3. Clone this repository and execute the OS installer:
 
 ```bash
-git clone https://github.com/CSrubenz/arch-installer.git
-cd arch-installer
+git clone https://github.com/CSrubenz/Arch_linux_installation.git
+cd Arch_linux_installation
 chmod +x install_arch.sh
 ./install_arch.sh
 ```
