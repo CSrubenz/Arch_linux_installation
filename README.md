@@ -60,8 +60,11 @@ Enjoy!
 
 ## 🛠️ Post-Installation Notes
 
+* Use add_disk.sh to mount an additional disk if you want.
+
 * Audio: Managed by PipeWire. Use the Waybar module or pavucontrol to manage outputs.
 
 * Bluetooth: Managed by bluez and the blueman-applet running in the system tray.
 
 * Typographic Quotes (T480): If using the T480 ANSI profile, AltGr + < outputs <.
+

@@ -1,6 +1,6 @@
 #!/bin/bash
 # ==============================================================================
-# ARCH LINUX INSTALLATION AND HARDWARE DRIVERS
+# ARCH LINUX INSTALLATION AND HARDWARE DRIVERS (LUKS + LVM)
 # ==============================================================================
 set -e
 
@@ -17,16 +17,16 @@ if [ "$1" != "--chroot" ]; then
     read -p "-> " PROFIL_CHOIX
 
     if [ "$PROFIL_CHOIX" = "1" ]; then
-        HW_HOSTNAME="arch-desktop"
-		HW_TYPE="desktop"
+        HW_HOSTNAME="desktop"
+        HW_TYPE="desktop"
         HW_CPU="amd"
         HW_IGPU="amd"
         HW_DGPU="amd"
         HW_KEY_SOFT="fr"
         HW_KEY_PHYS="iso"
     elif [ "$PROFIL_CHOIX" = "2" ]; then
-        HW_HOSTNAME="arch-t480"
-		HW_TYPE="laptop"
+        HW_HOSTNAME="t480"
+        HW_TYPE="laptop"
         HW_CPU="intel"
         HW_IGPU="intel"
         HW_DGPU="nvidia"
@@ -36,9 +36,9 @@ if [ "$1" != "--chroot" ]; then
         echo "--- MANUAL CONFIGURATION ---"
         read -p "-> Hostname: " HW_HOSTNAME
 
-		echo "-> Type of machine? [1] Desktop  [2] Laptop"
-		read -p "   Choice: " type_c
-		[ "$type_c" = "1" ] && HW_TYPE="desktop" || HW_TYPE="laptop"
+        echo "-> Type of machine? [1] Desktop  [2] Laptop"
+        read -p "   Choice: " type_c
+        [ "$type_c" = "1" ] && HW_TYPE="desktop" || HW_TYPE="laptop"
 
         echo "-> Processor (CPU)? [1] AMD  [2] Intel"
         read -p "   Choice: " cpu_c
@@ -79,54 +79,90 @@ if [ "$1" != "--chroot" ]; then
     pacman -Sy --noconfirm reflector
     reflector --country France --age 24 --sort rate --save /etc/pacman.d/mirrorlist
 
+    # ==========================================================================
+    # DISK MANAGEMENT (LUKS + LVM)
+    # ==========================================================================
     echo "==> DISK MANAGEMENT"
     lsblk
     read -p "-> Which disk to install on? (e.g., /dev/nvme0n1): " DISK
-    echo "-> Press Enter to launch cfdisk and create your partitions..."
+    echo "-> Press Enter to launch cfdisk."
+    echo "   [!] Create ONLY TWO partitions: 1=EFI (e.g., 500M), 2=Linux Filesystem (The Rest)"
     read
     cfdisk $DISK
 
     lsblk $DISK
     read -p "-> EFI Partition (e.g., ${DISK}p1): " PART_EFI
-    read -p "-> SWAP Partition (Leave empty to skip): " PART_SWAP
-    read -p "-> ROOT Partition (e.g., ${DISK}p3): " PART_ROOT
-    read -p "-> HOME Partition (Leave empty to include in ROOT): " PART_HOME
+    read -p "-> Partition to Encrypt (e.g., ${DISK}p2): " PART_CRYPT
 
-    echo "==> Formatting and Mounting..."
-    mkfs.fat -F32 $PART_EFI
-    mkfs.ext4 -F $PART_ROOT
-    [ -n "$PART_SWAP" ] && mkswap $PART_SWAP && swapon $PART_SWAP
-    [ -n "$PART_HOME" ] && mkfs.ext4 -F $PART_HOME
+    # LVM Sizes
+    read -p "-> Enter SWAP size in GB (e.g., 16): " SWAP_SIZE
+    read -p "-> Enter ROOT size in GB (e.g., 50, or leave empty to use 100% of remaining disk): " ROOT_SIZE
 
-    mount $PART_ROOT /mnt
-    mkdir -p /mnt/boot
-    mount $PART_EFI /mnt/boot
-    if [ -n "$PART_HOME" ]; then
-        mkdir -p /mnt/home
-        mount $PART_HOME /mnt/home
+    # Encryption
+    echo "==> Encrypting $PART_CRYPT (WARNING: This will erase the partition!)..."
+    echo "-> REMINDER: Type your LUKS password in QWERTY layout just in case!"
+    cryptsetup -y -v luksFormat $PART_CRYPT
+    echo "-> Opening the encrypted container..."
+    cryptsetup open $PART_CRYPT cryptlvm
+
+    # LVM Creation
+    echo "==> Creating LVM Volumes inside the encrypted container..."
+    pvcreate /dev/mapper/cryptlvm
+    vgcreate vg0 /dev/mapper/cryptlvm
+
+    if [ -n "$SWAP_SIZE" ]; then
+        lvcreate -L ${SWAP_SIZE}G vg0 -n swap
     fi
 
+    if [ -n "$ROOT_SIZE" ]; then
+        lvcreate -L ${ROOT_SIZE}G vg0 -n root
+        lvcreate -l 100%FREE vg0 -n home
+    else
+        lvcreate -l 100%FREE vg0 -n root
+    fi
+
+    echo "==> Formatting and Mounting LVM Volumes..."
+    mkfs.fat -F32 $PART_EFI
+    mkfs.ext4 -F /dev/vg0/root
+    [ -b "/dev/vg0/home" ] && mkfs.ext4 -F /dev/vg0/home
+    [ -b "/dev/vg0/swap" ] && mkswap /dev/vg0/swap && swapon /dev/vg0/swap
+
+    mount /dev/vg0/root /mnt
+    mkdir -p /mnt/boot
+    mount $PART_EFI /mnt/boot
+    if [ -b "/dev/vg0/home" ]; then
+        mkdir -p /mnt/home
+        mount /dev/vg0/home /mnt/home
+    fi
+
+    # Added lvm2 to the base pacstrap
     echo "==> Installing base system..."
-    pacstrap /mnt base linux linux-firmware nvim git stow sudo
+    pacstrap /mnt base linux linux-firmware nvim git stow sudo lvm2
     genfstab -U /mnt >> /mnt/etc/fstab
 
-    # SAVE HARDWARE PROFILE FOR THE CHROOT AND THE SETUP SCRIPT
+    # SAVE HARDWARE PROFILE AND LUKS UUID FOR THE CHROOT
+    CRYPT_UUID=$(blkid -s UUID -o value $PART_CRYPT)
+
     echo "HW_HOSTNAME=$HW_HOSTNAME" > /mnt/etc/arch_hw_profile.conf
-	echo "HW_TYPE=$HW_TYPE" >> /mnt/etc/arch_hw_profile.conf
+    echo "HW_TYPE=$HW_TYPE" >> /mnt/etc/arch_hw_profile.conf
     echo "HW_CPU=$HW_CPU" >> /mnt/etc/arch_hw_profile.conf
     echo "HW_IGPU=$HW_IGPU" >> /mnt/etc/arch_hw_profile.conf
     echo "HW_DGPU=$HW_DGPU" >> /mnt/etc/arch_hw_profile.conf
     echo "HW_KEY_SOFT=$HW_KEY_SOFT" >> /mnt/etc/arch_hw_profile.conf
     echo "HW_KEY_PHYS=$HW_KEY_PHYS" >> /mnt/etc/arch_hw_profile.conf
+    echo "CRYPT_UUID=$CRYPT_UUID" >> /mnt/etc/arch_hw_profile.conf
 
     echo "==> Entering chroot environment..."
     cp "$0" /mnt/install_arch.sh
-	cp "$(dirname "$0")/setup.sh" /mnt/setup.sh
+    cp "$(dirname "$0")/setup.sh" /mnt/setup.sh
     arch-chroot /mnt /install_arch.sh --chroot
 
-    echo "[OK] OS INSTALLED SUCCESSFULLY!"
-    echo "-> Type 'reboot', log in, and run setup_user.sh."
+    echo "[OK] OS INSTALLED SUCCESSFULLY (ENCRYPTED LVM)!"
+    echo "-> Type 'reboot', log in, and run ./setup.sh."
     umount -R /mnt
+    swapoff -a
+    vgchange -an vg0
+    cryptsetup close cryptlvm
     exit 0
 fi
 
@@ -163,9 +199,20 @@ mv /setup.sh /home/$USER_NAME/
 chown $USER_NAME:$USER_NAME /home/$USER_NAME/setup.sh
 chmod +x /home/$USER_NAME/setup.sh
 
-# 2. Bootloader and CPU Microcode
+# ==========================================================================
+# LUKS + LVM SYSTEM CONFIGURATION (MKINITCPIO & GRUB)
+# ==========================================================================
+echo "==> Configuring mkinitcpio for Encryption and LVM..."
+sed -i 's/^HOOKS=(.*/HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt lvm2 filesystems fsck)/' /etc/mkinitcpio.conf
+mkinitcpio -P
+
 echo "==> Installing GRUB Bootloader..."
 pacman -S --noconfirm grub efibootmgr os-prober mtools dosfstools
+
+# Modify GRUB to unlock LUKS
+sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"cryptdevice=UUID=${CRYPT_UUID}:cryptlvm root=/dev/vg0/root\"|" /etc/default/grub
+sed -i 's/^#GRUB_ENABLE_CRYPTODISK=y/GRUB_ENABLE_CRYPTODISK=y/' /etc/default/grub
+
 grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 grub-mkconfig -o /boot/grub/grub.cfg
 
@@ -204,7 +251,7 @@ pacman -S --noconfirm \
     hyprland waybar foot fuzzel hyprpaper mako polkit-kde-agent \
     wlr-randr wl-clipboard slurp grim wlsunset wtype \
     pipewire pipewire-audio pipewire-pulse pipewire-alsa wireplumber \
-	pavucontrol playerctl \
+    pavucontrol playerctl \
     bluez bluez-utils blueman
 
 echo "==> Installing specific hardware tools..."
@@ -231,3 +278,6 @@ echo "XMODIFIERS=@im=fcitx" >> /etc/environment
 echo "==> Enabling system services..."
 systemctl enable NetworkManager
 systemctl enable bluetooth
+
+# Clean up
+rm /install_arch.sh
