@@ -249,7 +249,7 @@ GPU_PKGS="lact"
 [ "$HW_IGPU" = "amd" ] && GPU_PKGS="$GPU_PKGS mesa vulkan-radeon xf86-video-amdgpu"
 
 # dGPU logic (nvidia-legacy will be install later with yay in setup.sh)
-[ "$HW_DGPU" = "amd" ] && GPU_PKGS="$GPU_PKGS mesa vulkan-radeon xf86-video-amdgpu"
+[ "$HW_DGPU" = "amd" ] && GPU_PKGS="$GPU_PKGS mesa vulkan-radeon xf86-video-amdgpu rocm-smi-lib"
 [ "$HW_DGPU" = "nvidia" ] && GPU_PKGS="$GPU_PKGS nvidia nvidia-utils"
 [ "$HW_DGPU" = "intel" ] && GPU_PKGS="$GPU_PKGS mesa vulkan-intel"
 
@@ -289,6 +289,7 @@ fi
 echo "==> Installing Apps & Fonts (Multimedia, PDF, Chinese input)..."
 pacman -S --noconfirm \
     firefox pcmanfm gvfs mpv imv yt-dlp imagemagick ffmpeg syncthing \
+	syncthing bottom \
     zathura zathura-cb zathura-djvu zathura-pdf-mupdf zathura-ps \
     noto-fonts noto-fonts-emoji noto-fonts-cjk noto-fonts-extra ttf-nerd-fonts-symbols \
     wqy-zenhei wqy-microhei wqy-bitmapfont fcitx5 fcitx5-im fcitx5-chinese-addons
