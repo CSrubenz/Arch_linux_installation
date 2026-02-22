@@ -21,9 +21,28 @@ This repository contains the scripts to bootstrap a highly optimized, bloat-free
 ### Phase 1: Base System Installation (From Live USB)
 1. Boot into the official Arch Linux Live USB.
 2. Ensure you have an active internet connection (e.g., via ethernet or `iwctl`).
-3. Clone this repository and execute the OS installer:
+    * Use wired internet connexion if recommended.
+    * If you want use Wifi:
+    ```Bash
+        iwctl
+        station wlan0 scan
+        station wlan0 get-networks
+        station wlan0 connect "your_box_name"
+        exit
+    ```
+    * Testing your connexion with:
+    ```Bash
+        ping -c 3 archlinux.org
+    ```
 
+3. Install git:
 ```bash
+packman -Sy git
+```
+
+4. Clone this repository and execute the OS installer:
+```bash
+packman
 git clone https://github.com/CSrubenz/Arch_linux_installation.git
 cd Arch_linux_installation
 chmod +x install_arch.sh
@@ -36,6 +55,14 @@ Note: The script will guide you through partitioning (cfdisk) and ask for your h
 
 Log in with your newly created user account.
 
+Make sure you have internet :
+
+Wifi:
+```bash
+nmtui
+```
+
+Run:
 ```bash
 ./setup.sh
 ```

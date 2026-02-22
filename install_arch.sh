@@ -164,6 +164,7 @@ if [ "$1" != "--chroot" ]; then
     echo "==> Entering chroot environment..."
     cp "$0" /mnt/install_arch.sh
     cp "$(dirname "$0")/setup.sh" /mnt/setup.sh
+    cp "$(dirname "$0")/add_disk.sh" /mnt/add_disk.sh
     arch-chroot /mnt /install_arch.sh --chroot
 
     echo "[OK] OS INSTALLED SUCCESSFULLY (ENCRYPTED LVM)!"
@@ -228,7 +229,7 @@ echo "==> Installing GRUB Bootloader..."
 pacman -S --noconfirm grub efibootmgr os-prober mtools dosfstools
 
 # Modify GRUB to unlock LUKS
-sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"cryptdevice=UUID=${CRYPT_UUID}:cryptlvm root=/dev/vg0/root\"|" /etc/default/grub
+sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"cryptdevice=UUID=${CRYPT_UUID}:cryptlvm:allow-discards root=/dev/vg0/root\"|" /etc/default/grub
 sed -i 's/^#GRUB_ENABLE_CRYPTODISK=y/GRUB_ENABLE_CRYPTODISK=y/' /etc/default/grub
 
 grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
@@ -241,7 +242,7 @@ echo "==> Installing CPU Microcode..."
 # ==========================================================================
 # SMART GPU DRIVER STACKING
 # ==========================================================================
-GPU_PKGS=""
+GPU_PKGS="lact"
 
 # iGPU logic
 [ "$HW_IGPU" = "intel" ] && GPU_PKGS="$GPU_PKGS mesa vulkan-intel"
@@ -271,11 +272,12 @@ pacman -Sy
 
 echo "==> Installing Core Desktop (Hyprland & Wayland tools)..."
 pacman -S --noconfirm \
-    hyprland waybar foot fuzzel hyprpaper mako polkit-kde-agent \
+	qt5-wayland qt6-wayland qt5ct qt6ct xdg-desktop-portal-hyprland xdg-desktop-portal-gtk \
+	hyprland waybar foot fuzzel hyprpaper mako hyprpolkitagent \
     wlr-randr wl-clipboard slurp grim wlsunset wtype \
     pipewire pipewire-audio pipewire-pulse pipewire-alsa wireplumber \
-    pavucontrol playerctl \
-    bluez bluez-utils blueman
+    pavucontrol playerctl bluez bluez-utils blueman
+
 
 echo "==> Installing specific hardware tools..."
 if [ "$HW_TYPE" = "laptop" ]; then
@@ -286,11 +288,10 @@ fi
 
 echo "==> Installing Apps & Fonts (Multimedia, PDF, Chinese input)..."
 pacman -S --noconfirm \
-    firefox pcmanfm gvfs mpv imv yt-dlp imagemagick ffmpeg \
+    firefox pcmanfm gvfs mpv imv yt-dlp imagemagick ffmpeg syncthing \
     zathura zathura-cb zathura-djvu zathura-pdf-mupdf zathura-ps \
     noto-fonts noto-fonts-emoji noto-fonts-cjk noto-fonts-extra ttf-nerd-fonts-symbols \
-    wqy-zenhei wqy-microhei wqy-bitmapfont \
-    fcitx5 fcitx5-im fcitx5-chinese-addons
+    wqy-zenhei wqy-microhei wqy-bitmapfont fcitx5 fcitx5-im fcitx5-chinese-addons
 
 # Wayland environment variables (required for fcitx5 Chinese input)
 echo "GTK_IM_MODULE=fcitx" >> /etc/environment
