@@ -86,7 +86,7 @@ rm ~/.bashrc ~/.profile
 # Ensure the dotfiles directory exists
 if [ ! -d "$HOME/dotfiles" ]; then
     echo "-> Cloning dotfiles repository..."
-    git clone https://github.com/CSrubenz/dotfiles.git ~/dotfiles
+    git clone git@github.com:CSrubenz/dotfiles.git ~/dotfiles
 fi
 
 cd ~/dotfiles
