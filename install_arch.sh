@@ -272,7 +272,8 @@ pacman -Sy
 
 echo "==> Installing Core Desktop (Hyprland & Wayland tools)..."
 pacman -S --noconfirm \
-	qt5-wayland qt6-wayland qt5ct qt6ct xdg-desktop-portal-hyprland xdg-desktop-portal-gtk \
+	qt5-wayland qt6-wayland qt5ct qt6ct \
+	xdg-desktop-portal-hyprland xdg-desktop-portal-gtk \
 	hyprland waybar foot fuzzel hyprpaper mako hyprpolkitagent \
     wlr-randr wl-clipboard slurp grim wlsunset wtype \
     pipewire pipewire-audio pipewire-pulse pipewire-alsa wireplumber \
@@ -288,8 +289,8 @@ fi
 
 echo "==> Installing Apps & Fonts (Multimedia, PDF, Chinese input)..."
 pacman -S --noconfirm \
-    firefox pcmanfm gvfs mpv imv yt-dlp imagemagick ffmpeg syncthing \
-	syncthing bottom \
+    firefox brave-bin pcmanfm mpv imv yt-dlp imagemagick \
+	syncthing bottom gvfs ffmpeg \
     zathura zathura-cb zathura-djvu zathura-pdf-mupdf zathura-ps \
     noto-fonts noto-fonts-emoji noto-fonts-cjk noto-fonts-extra ttf-nerd-fonts-symbols \
     wqy-zenhei wqy-microhei wqy-bitmapfont fcitx5 fcitx5-im fcitx5-chinese-addons

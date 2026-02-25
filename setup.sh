@@ -47,6 +47,9 @@ yay -S --noconfirm \
     cargo go clang make \
     jre-openjdk python python-pip php ghc opam texlive-basic
 
+echo "==> Installing theme..."
+yay -S --noconfirm catppuccin-gtk-theme-mocha papirus-folders-catppuccin-git
+
 # HARDWARE ADAPTATION Nvidia
 if [ "$HW_DGPU" = "nvidia-legacy" ]; then
 	echo "==> NVIDIA Legacy (Pascal) detected : Install nvidia-580xx-dkms from the AUR..."

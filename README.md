@@ -9,7 +9,7 @@ This repository contains the scripts to bootstrap a highly optimized, bloat-free
 
 * **🧠 Smart Hardware Detection:** Automatically configures drivers based on your profile (Desktop, ThinkPad T480, or Custom). Handles iGPU/dGPU stacking (Intel/AMD/Nvidia) flawlessly.
 * **🔋 Form-Factor Aware:** Automatically installs `tlp`, `brightnessctl`, and `upower` (for merged battery stats) if a laptop is detected.
-* **⌨️ Keyboard Patching:** Uses `keyd` at the kernel level to map missing ISO keys (`<` and `>`) on ANSI keyboards (like the imported T480).
+* **⌨️ Input:** Uses fcitx5 for chinese input.
 * **🎮 Gaming Ready:** Pre-configured with Steam, Gamemode, Gamescope, MangoHud, Heroic Games Launcher, and ProtonUp-Qt.
 * **💻 Dev Ready:** Fully loaded runtime environment for Neovim LSPs (Rust, Go, C/C++, Java, Python, PHP, Haskell, OCaml, LaTeX) and Fzf-Lua (`rg`, `fd`, `fzf`).
 * **🪄 Seamless Handoff:** The installer automatically prepares the Phase 2 script in your new home directory with the correct permissions.
