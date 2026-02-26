@@ -8,7 +8,7 @@ This repository contains the scripts to bootstrap a highly optimized, bloat-free
 ## ✨ Features
 
 * **🧠 Smart Hardware Detection:** Automatically configures drivers based on your profile (Desktop, ThinkPad T480, or Custom). Handles iGPU/dGPU stacking (Intel/AMD/Nvidia) flawlessly.
-* **🔋 Form-Factor Aware:** Automatically installs `tlp`, `brightnessctl`, and `upower` (for merged battery stats) if a laptop is detected.
+* **🔋 Form-Factor Aware:** Automatically installs `tlp` and `brightnessctl` if a laptop is detected.
 * **⌨️ Input:** Uses fcitx5 for chinese input.
 * **🎮 Gaming Ready:** Pre-configured with Steam, Gamemode, Gamescope, MangoHud, Heroic Games Launcher, and ProtonUp-Qt.
 * **💻 Dev Ready:** Fully loaded runtime environment for Neovim LSPs (Rust, Go, C/C++, Java, Python, PHP, Haskell, OCaml, LaTeX) and Fzf-Lua (`rg`, `fd`, `fzf`).
