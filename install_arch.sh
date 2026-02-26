@@ -273,7 +273,7 @@ pacman -Sy
 echo "==> Installing Core Desktop (Hyprland & Wayland tools)..."
 pacman -S --noconfirm \
 	qt5-wayland qt6-wayland qt5ct qt6ct \
-	xdg-desktop-portal-hyprland xdg-desktop-portal-gtk \
+	xdg-user-dirs xdg-desktop-portal-hyprland xdg-desktop-portal-gtk \
 	hyprland waybar foot fuzzel hyprpaper mako hyprpolkitagent \
     wlr-randr wl-clipboard slurp grim wlsunset wtype \
     pipewire pipewire-audio pipewire-pulse pipewire-alsa wireplumber \

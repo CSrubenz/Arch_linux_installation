@@ -78,6 +78,9 @@ EOF
     sudo systemctl enable --now keyd
 fi
 
+echo "==> Creating standard user directories (Documents, Downloads, Pictures, etc.)..."
+xdg-user-dirs-update
+
 # DOTFILES DEPLOYMENT
 echo "==> Deploying Dotfiles with GNU Stow..."
 
