@@ -69,7 +69,7 @@ Run:
 
 Note: This script will install the AUR helper (yay), user-specific packages, clone CSrubenz/dotfiles repository, and deploy them using GNU Stow.
 
-### Phase 3: Blast Off
+### Phase 3: Clean up
 
 Once setup_user.sh finishes, your system is fully configured. You can safely delete the Arch_linux_installation repository :
 
@@ -87,7 +87,7 @@ Enjoy!
 
 ## 🛠️ Post-Installation Notes
 
-* Use add_disk.sh to mount an additional disk if you want.
+* Use add_disk.sh with sudo to mount an additional disk if you want.
 
 * Audio: Managed by PipeWire. Use the Waybar module or pavucontrol to manage outputs.
 
