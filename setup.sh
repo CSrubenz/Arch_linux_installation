@@ -84,9 +84,7 @@ xdg-user-dirs-update
 # DOTFILES DEPLOYMENT
 echo "==> Deploying Dotfiles with GNU Stow..."
 
-rm ~/.bashrc ~/.profile
 
-# Ensure the dotfiles directory exists
 if [ ! -d "$HOME/dotfiles" ]; then
     echo "-> Cloning dotfiles repository..."
     git clone https://github.com/CSrubenz/dotfiles.git ~/dotfiles
