@@ -84,6 +84,8 @@ xdg-user-dirs-update
 # DOTFILES DEPLOYMENT
 echo "==> Deploying Dotfiles with GNU Stow..."
 
+mkdir -p ~/dotfiles
+mkdir -p ~/.config
 
 if [ ! -d "$HOME/dotfiles" ]; then
     echo "-> Cloning dotfiles repository..."
