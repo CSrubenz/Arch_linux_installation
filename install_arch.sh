@@ -100,8 +100,8 @@ if [ "$1" != "--chroot" ]; then
     cfdisk $DISK
 
     lsblk $DISK
-    read -p "-> EFI Partition (e.g., ${DISK}p1): " PART_EFI
-    read -p "-> Partition to Encrypt (e.g., ${DISK}p2): " PART_CRYPT
+    read -p "-> EFI Partition (e.g., ${DISK}1, or ${DISK}p1 if NVME): " PART_EFI
+    read -p "-> Partition to Encrypt (e.g., ${DISK}2, or ${DISK}p2 if NVME): " PART_CRYPT
 
     # LVM Sizes
     read -p "-> Enter SWAP size in GB (e.g., 16): " SWAP_SIZE
@@ -110,9 +110,14 @@ if [ "$1" != "--chroot" ]; then
     # Encryption
     echo "==> Encrypting $PART_CRYPT (WARNING: This will erase the partition!)..."
     echo "-> REMINDER: Type your LUKS password in QWERTY layout just in case!"
-    cryptsetup -y -v luksFormat $PART_CRYPT
+    while ! cryptsetup -y -v luksFormat $PART_CRYPT; do
+		echo "[!] Formatting error (password did not match?). Please try again."
+    done
+
     echo "-> Opening the encrypted container..."
-    cryptsetup open $PART_CRYPT cryptlvm
+    while ! cryptsetup open $PART_CRYPT cryptlvm; do
+		echo "[!] Incorrect password. Please try again."
+    done
 
     # LVM Creation
     echo "==> Creating LVM Volumes inside the encrypted container..."
@@ -186,7 +191,10 @@ echo "==> Configuring Timezone and Locale..."
 ln -sf /usr/share/zoneinfo/Europe/Paris /etc/localtime
 hwclock --systohc
 sed -i 's/^#en_US.UTF-8/en_US.UTF-8/' /etc/locale.gen
-sed -i "s/^#$HW_KEY_SOFT\_/""$HW_KEY_SOFT""\_/" /etc/locale.gen || sed -i 's/^#fr_FR.UTF-8/fr_FR.UTF-8/' /etc/locale.gen
+sed -i "s/^#$HW_KEY_SOFT\_/""$HW_KEY_SOFT""\_/" /etc/locale.gen
+if ! grep -q "^${HW_KEY_SOFT}_" /etc/locale.gen; then
+	sed -i 's/^#fr_FR.UTF-8/fr_FR.UTF-8/' /etc/locale.gen
+fi
 locale-gen
 echo "LANG=en_US.UTF-8" > /etc/locale.conf
 echo "KEYMAP=$HW_KEY_SOFT" > /etc/vconsole.conf
@@ -212,6 +220,7 @@ done
 
 # Allow wheel group members to use sudo
 sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
+visudo -c || { echo "[!] /etc/sudoers invalide, annulation"; exit 1; }
 
 echo "==> Preparing setup script for $USER_NAME..."
 mv /setup.sh /home/$USER_NAME/

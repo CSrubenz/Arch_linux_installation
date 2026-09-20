@@ -32,6 +32,7 @@ if ! command -v yay &> /dev/null; then
     git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
     cd /tmp/yay-bin
     makepkg -si --noconfirm
+    cd ~
     rm -rf /tmp/yay-bin
 fi
 
@@ -84,7 +85,6 @@ xdg-user-dirs-update
 # DOTFILES DEPLOYMENT
 echo "==> Deploying Dotfiles with GNU Stow..."
 
-mkdir -p ~/dotfiles
 mkdir -p ~/.config
 
 if [ ! -d "$HOME/dotfiles" ]; then
@@ -104,8 +104,8 @@ chmod +x deploy.sh
 echo "==> Enabling critical services..."
 sudo systemctl enable --now fstrim.timer # SSD
 sudo systemctl enable --now lactd # GPU
-systemctl enable --now hyprpolkitagent.service # pop-up
-systemctl enable --now syncthing.service
+systemctl --user enable --now hyprpolkitagent.service # pop-up
+systemctl --user enable --now syncthing.service
 
 systemctl --user enable --now pipewire.service
 systemctl --user enable --now pipewire-pulse.service

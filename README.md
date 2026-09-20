@@ -1,22 +1,22 @@
-# 🚀 Arch Linux Automated Deployment (Installer Scripts)
+# Arch Linux Automated Deployment (Installer Scripts)
 
 Custom, fully automated Arch Linux installation.
 This repository contains the scripts to bootstrap a highly optimized, bloat-free Wayland environment (Hyprland) tailored for software development (Neovim/LSP) and gaming.
 
-⚠️ **Architecture Note:** This repository uses a "Separation of Concerns" approach. It ONLY handles the OS installation and package provisioning. The actual configurations (dotfiles) are stored in a separate repository (`CSrubenz/dotfiles`) which will be automatically fetched during the setup phase.
+[!] **Architecture Note:** This repository uses a "Separation of Concerns" approach. It ONLY handles the OS installation and package provisioning. The actual configurations (dotfiles) are stored in a separate repository (`CSrubenz/dotfiles`) which will be automatically fetched during the setup phase.
 
-## ✨ Features
+##  Features
 
-* **🧠 Smart Hardware Detection:** Automatically configures drivers based on your profile (Desktop, ThinkPad T480, or Custom). Handles iGPU/dGPU stacking (Intel/AMD/Nvidia) flawlessly.
-* **🔋 Form-Factor Aware:** Automatically installs `tlp` and `brightnessctl` if a laptop is detected.
-* **⌨️ Input:** Uses fcitx5 for chinese input.
-* **🎮 Gaming Ready:** Pre-configured with Steam, Gamemode, Gamescope, MangoHud, Heroic Games Launcher, and ProtonUp-Qt.
-* **💻 Dev Ready:** Fully loaded runtime environment for Neovim LSPs (Rust, Go, C/C++, Java, Python, PHP, Haskell, OCaml, LaTeX) and Fzf-Lua (`rg`, `fd`, `fzf`).
-* **🪄 Seamless Handoff:** The installer automatically prepares the Phase 2 script in your new home directory with the correct permissions.
+* ** Smart Hardware Detection:** Automatically configures drivers based on your profile (Desktop, ThinkPad T480, or Custom). Handles iGPU/dGPU stacking (Intel/AMD/Nvidia) flawlessly.
+* ** Form-Factor Aware:** Automatically installs `tlp` and `brightnessctl` if a laptop is detected.
+* ** Input:** Uses fcitx5 for chinese input.
+* ** Gaming Ready:** Pre-configured with Steam, Gamemode, Gamescope, MangoHud, Heroic Games Launcher, and ProtonUp-Qt.
+* ** Dev Ready:** Fully loaded runtime environment for Neovim LSPs (Rust, Go, C/C++, Java, Python, PHP, Haskell, OCaml, LaTeX) and Fzf-Lua (`rg`, `fd`, `fzf`).
+* ** Seamless Handoff:** The installer automatically prepares the Phase 2 script in your new home directory with the correct permissions.
 
 ---
 
-## 💿 Installation Guide
+## Installation Guide
 
 ### Phase 1: Base System Installation (From Live USB)
 1. Boot into the official Arch Linux Live USB.
@@ -84,7 +84,7 @@ Hyprland
 
 Enjoy!
 
-## 🛠️ Post-Installation Notes
+## Post-Installation Notes
 
 * Use add_disk.sh with sudo to mount an additional disk if you want.
 

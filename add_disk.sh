@@ -90,14 +90,21 @@ if [ "$IS_LUKS" = true ]; then
         chmod 400 "$KEY_FILE"
     fi
 
-    echo "-> Please enter the LUKS password for the disk to authorize auto-unlock:"
+	if cryptsetup open --test-passphrase "$DISK" --key-file "$KEY_FILE" 2>/dev/null; then
+		echo "-> Keyfile already registered on this disk, skipping luksAddKey."
+	else
+		echo "Please enter the LUKS password for the disk to authorise auto-unlock:"
+		while ! cryptsetup luksAddKey "$DISK" "$KEY_FILE"; do
+			echo "[!] Incorrect password or error. Please try again."
+		done
+	fi
 
-    while ! cryptsetup luksAddKey "$DISK" "$KEY_FILE"; do
-        echo "[!] Incorrect password or error. Please try again."
-    done
-
-    echo "==> Opening the encrypted volume..."
-    cryptsetup open "$DISK" "$MAPPER_NAME" --key-file "$KEY_FILE"
+	if [ -e "/dev/mapper/$MAPPER_NAME" ]; then
+		echo "==> Volume already open, skipping..."
+	else
+		echo "==> Opening the encrypted volume..."
+		cryptsetup open "$DISK" "$MAPPER_NAME" --key-file "$KEY_FILE"
+	fi
 
     if [ "$FORMAT_NEEDED" = true ]; then
         echo "==> Formatting the volume to Ext4..."
@@ -108,7 +115,7 @@ if [ "$IS_LUKS" = true ]; then
     PHYS_UUID=$(blkid -s UUID -o value "$DISK")
 
     echo "==> Updating /etc/crypttab..."
-    if ! grep -q "$MAPPER_NAME" /etc/crypttab; then
+    if ! grep -qE "^$MAPPER_NAME[[:space:]]" /etc/crypttab; then
         echo "$MAPPER_NAME UUID=$PHYS_UUID $KEY_FILE luks" >> /etc/crypttab
     fi
 else
@@ -127,7 +134,7 @@ if [ -z "$FS_TYPE" ]; then
 fi
 
 echo "==> Updating /etc/fstab..."
-if ! grep -q "$MOUNT_POINT" /etc/fstab; then
+if ! grep -qE "[[:space:]]$MOUNT_POINT[[:space:]]" /etc/fstab; then
     echo "UUID=$TARGET_UUID $MOUNT_POINT $FS_TYPE defaults,noatime 0 2" >> /etc/fstab
 fi
 
